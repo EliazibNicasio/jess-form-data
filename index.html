@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hi Jess</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #000;
+            overflow: hidden;
+            color: white;
+        }
+
+        /* Contenedor del contenido */
+        #contentBox {
+            position: relative;
+            z-index: 10;
+            backdrop-filter: blur(6px);
+            background: rgba(0,0,0,0.4);
+            margin: 100px auto;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        /* Estados invisibles */
+        .hidden {
+            opacity: 0;
+            transform: scale(0.6);
+        }
+
+        .visible {
+            opacity: 1;
+            transform: scale(1);
+            transition: all 1s ease;
+        }
+
+        /* Flores flotando */
+        .flower {
+            position: fixed;
+            top: -50px;
+            width: 40px;
+            opacity: 0.7;
+            pointer-events: none;
+            animation: fall 8s linear infinite;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-50px) translateX(0px) rotate(0deg); }
+            50% { transform: translateY(50vh) translateX(40px) rotate(90deg); }
+            100% { transform: translateY(110vh) translateX(-40px) rotate(180deg); }
+        }
+
+        /* Inputs */
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 6px;
+            border: none;
+            outline: none;
+        }
+
+        /* Botón */
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 8px;
+            background: #ff4f9a;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #ff2f85;
+        }
+
+        /* Mensaje guardado */
+        #savedMsg {
+            opacity: 0;
+            transition: opacity 1s ease;
+            margin-top: 10px;
+            color: #8ef78e;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <!-- Flores -->
+    <div id="flowers"></div>
+
+    <!-- CONTENIDO -->
+    <div id="contentBox">
+        <h1 id="hiJess" class="visible" style="font-size: 48px; margin-bottom: 20px;">Hi Jess</h1>
+
+        <p id="secondMsg" class="hidden" style="font-size: 18px;">
+            I want to make u the happiest woman in the world every day of my life.
+        </p>
+
+        <div id="formSection" class="hidden" style="margin-top: 20px;">
+            <div style="text-align:left;">Address to deliver the flowers:</div>
+            <input id="addressInput" type="text">
+
+            <div style="text-align:left; margin-top:15px;">Favorite Color?</div>
+            <input id="colorInput" type="text">
+
+            <button id="saveBtn">Save Information</button>
+
+            <div id="savedMsg">Saved Successfully 💖</div>
+        </div>
+    </div>
+
+    <script>
+        const hiJess = document.getElementById("hiJess");
+        const secondMsg = document.getElementById("secondMsg");
+        const formSection = document.getElementById("formSection");
+
+        /* Animaciones de aparición */
+        setTimeout(() => {
+            hiJess.classList.remove("visible");
+            hiJess.classList.add("hidden");
+        }, 1500);
+
+        setTimeout(() => {
+            secondMsg.classList.remove("hidden");
+            secondMsg.classList.add("visible");
+        }, 2700);
+
+        setTimeout(() => {
+            formSection.classList.remove("hidden");
+            formSection.classList.add("visible");
+        }, 4000);
+
+        /* Flores animadas */
+        function createFlower() {
+            const f = document.createElement("img");
+            f.src = "florlinda2.png";
+            f.classList.add("flower");
+
+            f.style.left = Math.random() * 100 + "vw";
+            f.style.animationDuration = (6 + Math.random() * 6) + "s";
+            f.style.width = (30 + Math.random() * 40) + "px";
+
+            document.body.appendChild(f);
+
+            setTimeout(() => f.remove(), 12000);
+        }
+
+        setInterval(createFlower, 700);
+
+        /* Guardar información */
+        document.getElementById("saveBtn").onclick = () => {
+            localStorage.setItem("jess_address", document.getElementById("addressInput").value);
+            localStorage.setItem("jess_color", document.getElementById("colorInput").value);
+
+            const msg = document.getElementById("savedMsg");
+            msg.style.opacity = 1;
+
+            setTimeout(() => msg.style.opacity = 0, 2000);
+        };
+    </script>
+
+
+</body>
+</html>
+
