@@ -1,75 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Jess Form Data</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hi Jess</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f2f2f2;
-            margin: 0;
-            padding: 0;
-            text-align: center;
+        .fade-out {
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 1.2s ease;
         }
-
-        /* Animación */
-        #intro {
-            font-size: 40px;
-            margin-top: 120px;
-            white-space: nowrap;
-            overflow: hidden;
-            border-right: 3px solid black;
-            width: 0ch;
-            animation: typing 3s steps(10) forwards,
-                       cursor .4s step-end infinite alternate;
-        }
-
-        @keyframes typing {
-            from { width: 0ch; }
-            to { width: 8ch; }
-        }
-        @keyframes cursor {
-            50% { border-color: transparent; }
-        }
-
-        /* Formulario oculto al inicio */
-        #app-container {
-            display: none;
-            margin-top: 40px;
-        }
-
-        input, textarea {
-            width: 300px;
-            margin: 10px;
-            padding: 10px;
+        .fade-in {
+            opacity: 1;
+            transform: scale(1);
+            transition: all 1s ease;
         }
     </style>
 </head>
 
-<body>
+<body class="bg-black text-white flex items-center justify-center min-h-screen">
 
-    <!-- Animación -->
-    <div id="intro">Hi Jess</div>
+    <!-- Contenedor general -->
+    <div id="app" class="text-center">
 
-    <!-- Formulario -->
-    <div id="app-container">
-        <h2>Formulario</h2>
-        <input id="name" placeholder="Nombre">
-        <input id="age" placeholder="Edad">
-        <textarea id="notes" placeholder="Notas"></textarea>
-        <button onclick="save()">Save</button>
+        <!-- Mensaje inicial -->
+        <h1 id="hiJess" class="text-6xl font-bold mb-4 transition-all duration-1000">
+            Hi Jess
+        </h1>
+
+        <!-- Mensaje secundario (oculto al inicio) -->
+        <p id="secondMsg" class="text-xl opacity-0 mb-8">
+            I want to make u the happiest woman in the world every day of my life.
+        </p>
+
+        <!-- Formulario (oculto al inicio) -->
+        <div id="formSection" class="opacity-0 mt-6">
+
+            <div class="mb-4">
+                <label class="block mb-1 text-left">Address to deliver the flowers:</label>
+                <input id="address" type="text" class="w-full p-2 text-black rounded">
+            </div>
+
+            <div class="mb-4">
+                <label class="block mb-1 text-left">Favorite Color?</label>
+                <input id="color" type="text" class="w-full p-2 text-black rounded">
+            </div>
+
+            <button onclick="save()" class="bg-pink-600 px-6 py-2 mt-4 rounded">
+                Save
+            </button>
+        </div>
     </div>
 
+    <!-- ANIMACIONES -->
     <script>
-        // Cuando termina la animación, mostrar formulario
-        document.getElementById("intro").addEventListener("animationend", () => {
-            document.getElementById("app-container").style.display = "block";
-        });
+        setTimeout(() => {
+            const hiJess = document.getElementById("hiJess");
+            const secondMsg = document.getElementById("secondMsg");
+            const formSection = document.getElementById("formSection");
 
-        function save() {
-            alert("Aquí va el código de guardado en GitHub (ya lo tienes en tu proyecto)");
+            hiJess.classList.add("fade-out");
+
+            setTimeout(() => {
+                secondMsg.classList.add("fade-in");
+
+                setTimeout(() => {
+                    formSection.classList.add("fade-in");
+                }, 1200);
+
+            }, 1200);
+        }, 1500);
+    </script>
+
+    <!-- SCRIPT PARA GUARDAR EN GITHUB -->
+    <script>
+        async function save() {
+
+            const token = "AQUI_PONES_TU_TOKEN";  // ← IMPORTANTE
+            const user = "EliazibNicasio";
+            const repo = "jess-form-data";
+
+            const address = document.getElementById("address").value;
+            const color = document.getElementById("color").value;
+
+            // Lo que se va a guardar
+            const content = 
+`Address: ${address}
+Favorite color: ${color}
+Saved at: ${new Date().toLocaleString()}`;
+
+            const encodedContent = btoa(unescape(encodeURIComponent(content)));
+
+            const filename = `data_${Date.now()}.txt`;
+            const path = `data/${filename}`;
+
+            const url = `https://api.github.com/repos/${user}/${repo}/contents/${path}`;
+
+            const bodySend = {
+                message: "Saving form data",
+                content: encodedContent
+            };
+
+            const response = await fetch(url, {
+                method: "PUT",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(bodySend)
+            });
+
+            if (response.ok) {
+                alert("Información guardada correctamente en GitHub.");
+            } else {
+                const txt = await response.text();
+                alert("Error al guardar:\n" + txt);
+                console.error(txt);
+            }
         }
     </script>
 
