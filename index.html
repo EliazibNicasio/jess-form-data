@@ -13,115 +13,137 @@
             transition: all 1.2s ease;
         }
         .fade-in {
-            opacity: 1;
-            transform: scale(1);
+            opacity: 1 !important;
+            transform: scale(1) !important;
             transition: all 1s ease;
+        }
+        #secondMsg, #formSection {
+            opacity: 0;
+            transform: scale(0.8);
         }
     </style>
 </head>
 
 <body class="bg-black text-white flex items-center justify-center min-h-screen">
 
-    <!-- Contenedor general -->
     <div id="app" class="text-center">
 
-        <!-- Mensaje inicial -->
         <h1 id="hiJess" class="text-6xl font-bold mb-4 transition-all duration-1000">
             Hi Jess
         </h1>
 
-        <!-- Mensaje secundario (oculto al inicio) -->
-        <p id="secondMsg" class="text-xl opacity-0 mb-8">
-            I want to make u the happiest woman in the world every day of my life.
+        <p id="secondMsg" class="text-xl mb-8">
+            I want to make you the happiest woman in the world every day of my life.
         </p>
 
-        <!-- Formulario (oculto al inicio) -->
-        <div id="formSection" class="opacity-0 mt-6">
-
+        <div id="formSection" class="mt-6 max-w-md mx-auto">
             <div class="mb-4">
                 <label class="block mb-1 text-left">Address to deliver the flowers:</label>
-                <input id="address" type="text" class="w-full p-2 text-black rounded">
+                <input id="addressInput" type="text" class="w-full p-2 text-black rounded">
             </div>
 
             <div class="mb-4">
                 <label class="block mb-1 text-left">Favorite Color?</label>
-                <input id="color" type="text" class="w-full p-2 text-black rounded">
+                <input id="colorInput" type="text" class="w-full p-2 text-black rounded">
             </div>
 
-            <button onclick="save()" class="bg-pink-600 px-6 py-2 mt-4 rounded">
+            <button id="saveBtn" class="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded">
                 Save
             </button>
+
+            <p id="statusMsg" class="mt-4 text-green-400"></p>
         </div>
+
     </div>
 
-    <!-- ANIMACIONES -->
     <script>
-        setTimeout(() => {
+        // =====================================================
+        //   PEGAR AQUÍ TU TOKEN (entre comillas)
+        // =====================================================
+        const TOKEN = "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";
+        // =====================================================
+
+        const USER = "EliazibNicasio";
+        const REPO = "jess-form-data";
+        const FILE_PATH = "data/form-data.txt";
+
+        // Animaciones
+        window.onload = () => {
             const hiJess = document.getElementById("hiJess");
             const secondMsg = document.getElementById("secondMsg");
             const formSection = document.getElementById("formSection");
 
-            hiJess.classList.add("fade-out");
-
             setTimeout(() => {
-                secondMsg.classList.add("fade-in");
+                hiJess.classList.add("fade-out");
 
                 setTimeout(() => {
-                    formSection.classList.add("fade-in");
+                    secondMsg.classList.add("fade-in");
+
+                    setTimeout(() => {
+                        formSection.classList.add("fade-in");
+                    }, 1000);
+
                 }, 1200);
 
-            }, 1200);
-        }, 1500);
-    </script>
+            }, 1500);
+        };
 
-    <!-- SCRIPT PARA GUARDAR EN GITHUB -->
-    <script>
-        async function save() {
+        // Guardado en GitHub
+        document.getElementById("saveBtn").addEventListener("click", async () => {
 
-            const token = "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";  // ← IMPORTANTE
-            const user = "EliazibNicasio";
-            const repo = "jess-form-data";
+            const address = document.getElementById("addressInput").value.trim();
+            const color = document.getElementById("colorInput").value.trim();
+            const statusMsg = document.getElementById("statusMsg");
 
-            const address = document.getElementById("address").value;
-            const color = document.getElementById("color").value;
+            if (!address || !color) {
+                statusMsg.textContent = "Please fill out both fields.";
+                statusMsg.style.color = "red";
+                return;
+            }
 
-            // Lo que se va a guardar
-            const content = 
-`Address: ${address}
-Favorite color: ${color}
-Saved at: ${new Date().toLocaleString()}`;
+            statusMsg.textContent = "Saving...";
+            statusMsg.style.color = "yellow";
 
-            const encodedContent = btoa(unescape(encodeURIComponent(content)));
+            const content = `Address: ${address}\nFavorite Color: ${color}\nDate: ${new Date().toLocaleString()}\n\n`;
+            const encoded = btoa(unescape(encodeURIComponent(content)));
 
-            const filename = `data_${Date.now()}.txt`;
-            const path = `data/${filename}`;
-
-            const url = `https://api.github.com/repos/${user}/${repo}/contents/${path}`;
-
-            const bodySend = {
-                message: "Saving form data",
-                content: encodedContent
-            };
-
-            const response = await fetch(url, {
-                method: "PUT",
+            // Obtener SHA si el archivo existe
+            const getFile = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/${FILE_PATH}`, {
                 headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(bodySend)
+                    "Authorization": `token ${TOKEN}`,
+                    "Accept": "application/vnd.github+json"
+                }
             });
 
-            if (response.ok) {
-                alert("Información guardada correctamente en GitHub.");
-            } else {
-                const txt = await response.text();
-                alert("Error al guardar:\n" + txt);
-                console.error(txt);
+            let sha = null;
+            if (getFile.status === 200) {
+                const fileData = await getFile.json();
+                sha = fileData.sha;
             }
-        }
+
+            // Crear o actualizar archivo
+            const update = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/${FILE_PATH}`, {
+                method: "PUT",
+                headers: {
+                    "Authorization": `token ${TOKEN}`,
+                    "Accept": "application/vnd.github+json"
+                },
+                body: JSON.stringify({
+                    message: "Form data updated",
+                    content: encoded,
+                    sha: sha
+                })
+            });
+
+            if (update.status === 201 || update.status === 200) {
+                statusMsg.textContent = "Saved successfully!";
+                statusMsg.style.color = "lightgreen";
+            } else {
+                statusMsg.textContent = "Error saving.";
+                statusMsg.style.color = "red";
+            }
+        });
     </script>
 
 </body>
 </html>
-
