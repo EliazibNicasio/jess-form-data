@@ -1,176 +1,148 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hi Jess</title>
-
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background: #000;
-            overflow: hidden;
-            color: white;
-        }
-
-        /* Contenedor del contenido */
-        #contentBox {
-            position: relative;
-            z-index: 10;
-            backdrop-filter: blur(6px);
-            background: rgba(0,0,0,0.4);
-            margin: 100px auto;
-            padding: 30px;
-            width: 90%;
-            max-width: 400px;
-            border-radius: 15px;
-            text-align: center;
-        }
-
-        /* Estados invisibles */
-        .hidden {
-            opacity: 0;
-            transform: scale(0.6);
-        }
-
-        .visible {
-            opacity: 1;
-            transform: scale(1);
-            transition: all 1s ease;
-        }
-
-        /* Flores flotando */
-        .flower {
-            position: fixed;
-            top: -50px;
-            width: 40px;
-            opacity: 0.7;
-            pointer-events: none;
-            animation: fall 8s linear infinite;
-        }
-
-        @keyframes fall {
-            0% { transform: translateY(-50px) translateX(0px) rotate(0deg); }
-            50% { transform: translateY(50vh) translateX(40px) rotate(90deg); }
-            100% { transform: translateY(110vh) translateX(-40px) rotate(180deg); }
-        }
-
-        /* Inputs */
-        input {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            border-radius: 6px;
-            border: none;
-            outline: none;
-        }
-
-        /* Botón */
-        button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 10px;
-            border: none;
-            border-radius: 8px;
-            background: #ff4f9a;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #ff2f85;
-        }
-
-        /* Mensaje guardado */
-        #savedMsg {
-            opacity: 0;
-            transition: opacity 1s ease;
-            margin-top: 10px;
-            color: #8ef78e;
-        }
-
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Hi Jess</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .fade-out { opacity: 0; transform: scale(0.5); transition: all 1.2s ease; }
+    .fade-in { opacity: 1; transform: scale(1); transition: all 1s ease; }
+  </style>
 </head>
+<body class="bg-black text-white flex items-center justify-center min-h-screen">
+  <div id="app" class="text-center w-full max-w-xl p-6">
+    <h1 id="hiJess" class="text-6xl font-bold mb-4 transition-all duration-1000">Hi Jess</h1>
+    <p id="secondMsg" class="text-xl opacity-0 mb-8">I want to make u the happiest woman in the world every day of my life.</p>
 
-<body>
+    <div id="formSection" class="opacity-0 mt-6 text-left bg-white/5 p-6 rounded">
+      <div class="mb-4">
+        <label class="block mb-1">Address to deliver the flowers:</label>
+        <input id="address" type="text" class="w-full p-2 text-black rounded" placeholder="Dirección...">
+      </div>
 
-    <!-- Flores -->
-    <div id="flowers"></div>
+      <div class="mb-4">
+        <label class="block mb-1">Favorite Color?</label>
+        <input id="color" type="text" class="w-full p-2 text-black rounded" placeholder="Color favorito...">
+      </div>
 
-    <!-- CONTENIDO -->
-    <div id="contentBox">
-        <h1 id="hiJess" class="visible" style="font-size: 48px; margin-bottom: 20px;">Hi Jess</h1>
+      <div class="flex gap-3">
+        <button id="saveBtn" class="bg-pink-600 px-4 py-2 rounded text-white font-bold">Save Information</button>
+        <button id="enterTokenBtn" class="bg-gray-600 px-4 py-2 rounded text-white">Ingresar token / Ver token</button>
+        <button id="logoutTokenBtn" class="bg-red-600 px-4 py-2 rounded text-white">Borrar token</button>
+      </div>
 
-        <p id="secondMsg" class="hidden" style="font-size: 18px;">
-            I want to make u the happiest woman in the world every day of my life.
-        </p>
-
-        <div id="formSection" class="hidden" style="margin-top: 20px;">
-            <div style="text-align:left;">Address to deliver the flowers:</div>
-            <input id="addressInput" type="text">
-
-            <div style="text-align:left; margin-top:15px;">Favorite Color?</div>
-            <input id="colorInput" type="text">
-
-            <button id="saveBtn">Save Information</button>
-
-            <div id="savedMsg">Saved Successfully 💖</div>
-        </div>
+      <p id="status" class="mt-3 text-sm text-gray-300"></p>
     </div>
+  </div>
 
-    <script>
-        const hiJess = document.getElementById("hiJess");
-        const secondMsg = document.getElementById("secondMsg");
-        const formSection = document.getElementById("formSection");
+<script>
+  // animación inicial
+  setTimeout(() => {
+    document.getElementById("hiJess").classList.add("fade-out");
+    setTimeout(() => {
+      document.getElementById("secondMsg").classList.add("fade-in");
+      setTimeout(() => { document.getElementById("formSection").classList.add("fade-in"); }, 1200);
+    }, 1200);
+  }, 1500);
 
-        /* Animaciones de aparición */
-        setTimeout(() => {
-            hiJess.classList.remove("visible");
-            hiJess.classList.add("hidden");
-        }, 1500);
+  // HELPERS
+  function getToken() {
+    return sessionStorage.getItem("GITHUB_PAT");
+  }
+  function setToken(t) {
+    sessionStorage.setItem("GITHUB_PAT", t);
+  }
+  function clearToken() {
+    sessionStorage.removeItem("GITHUB_PAT");
+  }
 
-        setTimeout(() => {
-            secondMsg.classList.remove("hidden");
-            secondMsg.classList.add("visible");
-        }, 2700);
+  // Pide el token al usuario (prompt) y lo guarda en sessionStorage
+  document.getElementById("enterTokenBtn").addEventListener("click", () => {
+    const existing = getToken();
+    const input = prompt("Introduce tu GitHub Personal Access Token (solo se guardará temporalmente en este navegador):", existing ? existing : "");
+    if (input !== null) {
+      setToken(input.trim());
+      document.getElementById("status").innerText = "Token guardado en esta sesión del navegador.";
+    }
+  });
 
-        setTimeout(() => {
-            formSection.classList.remove("hidden");
-            formSection.classList.add("visible");
-        }, 4000);
+  document.getElementById("logoutTokenBtn").addEventListener("click", () => {
+    clearToken();
+    document.getElementById("status").innerText = "Token eliminado de esta sesión.";
+  });
 
-        /* Flores animadas */
-        function createFlower() {
-            const f = document.createElement("img");
-            f.src = "florlinda2.png";
-            f.classList.add("flower");
+  // Función que guarda en GitHub usando la API (PUT a /contents/<path>)
+  async function saveToGitHub(address, color) {
+    const token = getToken();
+    if (!token) {
+      alert("Primero debes ingresar tu token (botón 'Ingresar token / Ver token').");
+      return;
+    }
 
-            f.style.left = Math.random() * 100 + "vw";
-            f.style.animationDuration = (6 + Math.random() * 6) + "s";
-            f.style.width = (30 + Math.random() * 40) + "px";
+    // --- CONFIGURA ESTO según tu repo ---
+    const owner = "TU_USUARIO_GITHUB";        // reemplaza
+    const repo  = "jess-form-data";          // reemplaza si es distinto
+    // --- FIN CONFIG ---
 
-            document.body.appendChild(f);
+    // Construir nombre de archivo con fecha legible
+    const now = new Date();
+    const timestamp = now.toISOString().replace(/[:.]/g, "-");
+    const filename = `data/${timestamp}.txt`;
 
-            setTimeout(() => f.remove(), 12000);
-        }
+    const content = `Address: ${address}\nFavorite Color: ${color}\nSaved at: ${now.toLocaleString()}\n`;
+    const encoded = btoa(unescape(encodeURIComponent(content))); // base64
 
-        setInterval(createFlower, 700);
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${filename}`;
 
-        /* Guardar información */
-        document.getElementById("saveBtn").onclick = () => {
-            localStorage.setItem("jess_address", document.getElementById("addressInput").value);
-            localStorage.setItem("jess_color", document.getElementById("colorInput").value);
+    document.getElementById("status").innerText = "Guardando en GitHub...";
 
-            const msg = document.getElementById("savedMsg");
-            msg.style.opacity = 1;
+    try {
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Accept": "application/vnd.github+json"
+        },
+        body: JSON.stringify({
+          message: `Add form data ${timestamp}`,
+          content: encoded
+        })
+      });
 
-            setTimeout(() => msg.style.opacity = 0, 2000);
-        };
-    </script>
+      if (!response.ok) {
+        const err = await response.json();
+        console.error(err);
+        document.getElementById("status").innerText = "Error al guardar: " + (err.message || response.status);
+        alert("Error al guardar en GitHub. Revisa la consola y el token/permiso.");
+        return;
+      }
 
+      document.getElementById("status").innerText = "Guardado correctamente en GitHub.";
+      alert("Datos guardados correctamente en el repositorio (carpeta data/).");
 
+    } catch (e) {
+      console.error(e);
+      document.getElementById("status").innerText = "Error de conexión al guardar.";
+      alert("Error de conexión: " + e.message);
+    }
+  }
+
+  // Evento del botón Save
+  document.getElementById("saveBtn").addEventListener("click", () => {
+    const address = document.getElementById("address").value.trim();
+    const color = document.getElementById("color").value.trim();
+
+    if (!address && !color) {
+      alert("Por favor completa al menos un campo antes de guardar.");
+      return;
+    }
+
+    saveToGitHub(address, color);
+  });
+
+  // Nota: reemplaza TU_USUARIO_GITHUB y jess-form-data en el código arriba
+</script>
 </body>
 </html>
-
