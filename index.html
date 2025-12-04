@@ -207,3 +207,49 @@ Saved at: ${now.toLocaleString()}
         try {
             const response = await fetch(url, {
                 method: "PUT",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                    "Accept": "application/vnd.github+json"
+                },
+                body: JSON.stringify({
+                    message: "Save Jess form data",
+                    content: encoded
+                })
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                status.innerText = "Error: " + err.message;
+                console.error(err);
+                return;
+            }
+
+            status.innerText = "Guardado correctamente.";
+            alert("Datos guardados en la carpeta /data/ del repositorio.");
+
+        } catch (e) {
+            status.innerText = "Error de conexión.";
+            console.error(e);
+        }
+    }
+
+
+    /* BOTÓN SAVE */
+    saveBtn.onclick = () => {
+        const address = document.getElementById("address").value.trim();
+        const color   = document.getElementById("color").value.trim();
+
+        if (!address && !color) {
+            alert("Escribe al menos uno de los campos.");
+            return;
+        }
+
+        saveToGitHub(address, color);
+    };
+
+</script>
+
+</body>
+</html>
+
