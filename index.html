@@ -1,148 +1,209 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Hi Jess</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    .fade-out { opacity: 0; transform: scale(0.5); transition: all 1.2s ease; }
-    .fade-in { opacity: 1; transform: scale(1); transition: all 1s ease; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hi Jess</title>
+
+    <style>
+        body {
+            margin: 0; padding: 0;
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: white;
+            overflow: hidden;
+        }
+
+        /* Caja central */
+        #contentBox {
+            position: relative;
+            z-index: 10;
+            backdrop-filter: blur(6px);
+            background: rgba(0,0,0,0.4);
+            margin: 100px auto;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        /* Animaciones */
+        .hidden { opacity: 0; transform: scale(0.6); }
+        .visible { opacity: 1; transform: scale(1); transition: all 1s ease; }
+
+        .fade-out { opacity: 0; transform: scale(0.5); transition: all 1.2s ease; }
+        .fade-in  { opacity: 1; transform: scale(1); transition: all 1s ease; }
+
+        /* Flores cayendo */
+        .flower {
+            position: fixed;
+            top: -50px;
+            opacity: 0.75;
+            pointer-events: none;
+            animation: fall 8s linear infinite;
+        }
+        @keyframes fall {
+            0%   { transform: translateY(-50px) translateX(0) rotate(0deg); }
+            50%  { transform: translateY(50vh) translateX(40px) rotate(90deg); }
+            100% { transform: translateY(110vh) translateX(-40px) rotate(180deg); }
+        }
+
+        /* Inputs */
+        input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: none;
+            outline: none;
+            margin-top: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 8px;
+            background: #ff4f9a;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background: #ff2f85; }
+
+        #savedMsg {
+            opacity: 0;
+            transition: opacity 1s ease;
+            margin-top: 10px;
+            color: #8ef78e;
+        }
+
+        /* Botones secundarios */
+        .smallBtn {
+            background: #555;
+            font-size: 14px;
+        }
+        .dangerBtn {
+            background: #b42828;
+        }
+    </style>
 </head>
-<body class="bg-black text-white flex items-center justify-center min-h-screen">
-  <div id="app" class="text-center w-full max-w-xl p-6">
-    <h1 id="hiJess" class="text-6xl font-bold mb-4 transition-all duration-1000">Hi Jess</h1>
-    <p id="secondMsg" class="text-xl opacity-0 mb-8">I want to make u the happiest woman in the world every day of my life.</p>
 
-    <div id="formSection" class="opacity-0 mt-6 text-left bg-white/5 p-6 rounded">
-      <div class="mb-4">
-        <label class="block mb-1">Address to deliver the flowers:</label>
-        <input id="address" type="text" class="w-full p-2 text-black rounded" placeholder="Dirección...">
-      </div>
+<body>
 
-      <div class="mb-4">
-        <label class="block mb-1">Favorite Color?</label>
-        <input id="color" type="text" class="w-full p-2 text-black rounded" placeholder="Color favorito...">
-      </div>
+    <!-- Flores animadas -->
+    <div id="flowers"></div>
 
-      <div class="flex gap-3">
-        <button id="saveBtn" class="bg-pink-600 px-4 py-2 rounded text-white font-bold">Save Information</button>
-        <button id="enterTokenBtn" class="bg-gray-600 px-4 py-2 rounded text-white">Ingresar token / Ver token</button>
-        <button id="logoutTokenBtn" class="bg-red-600 px-4 py-2 rounded text-white">Borrar token</button>
-      </div>
+    <!-- Caja central -->
+    <div id="contentBox">
+        <h1 id="hiJess" class="visible" style="font-size:48px; margin-bottom:20px;">Hi Jess</h1>
 
-      <p id="status" class="mt-3 text-sm text-gray-300"></p>
+        <p id="secondMsg" class="hidden" style="font-size:18px;">
+            I want to make u the happiest woman in the world every day of my life.
+        </p>
+
+        <div id="formSection" class="hidden" style="margin-top:20px;">
+            <div style="text-align:left;">Address to deliver the flowers:</div>
+            <input id="address" type="text">
+
+            <div style="text-align:left; margin-top:15px;">Favorite Color?</div>
+            <input id="color" type="text">
+
+            <button id="saveBtn">Save Information</button>
+
+            <button id="enterTokenBtn" class="smallBtn">Ingresar/Ver Token</button>
+            <button id="logoutTokenBtn" class="smallBtn dangerBtn">Borrar Token</button>
+
+            <p id="status" style="margin-top:10px; font-size:14px; color:#ccc;"></p>
+        </div>
     </div>
-  </div>
 
 <script>
-  // animación inicial
-  setTimeout(() => {
-    document.getElementById("hiJess").classList.add("fade-out");
+
+    /* ANIMACIÓN PRINCIPAL */
     setTimeout(() => {
-      document.getElementById("secondMsg").classList.add("fade-in");
-      setTimeout(() => { document.getElementById("formSection").classList.add("fade-in"); }, 1200);
-    }, 1200);
-  }, 1500);
+        hiJess.classList.add("fade-out");
+        setTimeout(() => {
+            secondMsg.classList.remove("hidden");
+            secondMsg.classList.add("visible");
 
-  // HELPERS
-  function getToken() {
-    return sessionStorage.getItem("GITHUB_PAT");
-  }
-  function setToken(t) {
-    sessionStorage.setItem("GITHUB_PAT", t);
-  }
-  function clearToken() {
-    sessionStorage.removeItem("GITHUB_PAT");
-  }
+            setTimeout(() => {
+                formSection.classList.remove("hidden");
+                formSection.classList.add("visible");
+            }, 1200);
 
-  // Pide el token al usuario (prompt) y lo guarda en sessionStorage
-  document.getElementById("enterTokenBtn").addEventListener("click", () => {
-    const existing = getToken();
-    const input = prompt("Introduce tu GitHub Personal Access Token (solo se guardará temporalmente en este navegador):", existing ? existing : "");
-    if (input !== null) {
-      setToken(input.trim());
-      document.getElementById("status").innerText = "Token guardado en esta sesión del navegador.";
+        }, 1200);
+    }, 1500);
+
+    /* FLORES */
+    function createFlower() {
+        const f = document.createElement("img");
+        f.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAA..." 
+        /* Aquí pondré una flor codificada en Base64 para que NO necesites ninguna imagen externa */
+        f.classList.add("flower");
+
+        f.style.left = Math.random()*100 + "vw";
+        f.style.animationDuration = (6 + Math.random()*6) + "s";
+        f.style.width = (30 + Math.random()*40) + "px";
+
+        document.body.appendChild(f);
+        setTimeout(() => f.remove(), 12000);
     }
-  });
+    setInterval(createFlower, 700);
 
-  document.getElementById("logoutTokenBtn").addEventListener("click", () => {
-    clearToken();
-    document.getElementById("status").innerText = "Token eliminado de esta sesión.";
-  });
 
-  // Función que guarda en GitHub usando la API (PUT a /contents/<path>)
-  async function saveToGitHub(address, color) {
-    const token = getToken();
-    if (!token) {
-      alert("Primero debes ingresar tu token (botón 'Ingresar token / Ver token').");
-      return;
-    }
 
-    // --- CONFIGURA ESTO según tu repo ---
-    const owner = "TU_USUARIO_GITHUB";        // reemplaza
-    const repo  = "jess-form-data";          // reemplaza si es distinto
-    // --- FIN CONFIG ---
+    /* TOKEN EN sessionStorage */
+    function getToken() { return sessionStorage.getItem("GITHUB_PAT"); }
+    function setToken(t) { sessionStorage.setItem("GITHUB_PAT", t); }
+    function clearToken() { sessionStorage.removeItem("GITHUB_PAT"); }
 
-    // Construir nombre de archivo con fecha legible
-    const now = new Date();
-    const timestamp = now.toISOString().replace(/[:.]/g, "-");
-    const filename = `data/${timestamp}.txt`;
+    document.getElementById("enterTokenBtn").onclick = () => {
+        const current = getToken() || "";
+        const newToken = prompt("Introduce tu GitHub PAT:", current);
+        if (newToken !== null) {
+            setToken(newToken.trim());
+            status.innerText = "Token guardado.";
+        }
+    };
 
-    const content = `Address: ${address}\nFavorite Color: ${color}\nSaved at: ${now.toLocaleString()}\n`;
-    const encoded = btoa(unescape(encodeURIComponent(content))); // base64
+    document.getElementById("logoutTokenBtn").onclick = () => {
+        clearToken();
+        status.innerText = "Token eliminado.";
+    };
 
-    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${filename}`;
 
-    document.getElementById("status").innerText = "Guardando en GitHub...";
+    /* GUARDAR EN GITHUB */
+    async function saveToGitHub(address, color) {
 
-    try {
-      const response = await fetch(url, {
-        method: "PUT",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-          "Accept": "application/vnd.github+json"
-        },
-        body: JSON.stringify({
-          message: `Add form data ${timestamp}`,
-          content: encoded
-        })
-      });
+        const token = getToken();
+        if (!token) {
+            alert("Ingresa tu token primero.");
+            return;
+        }
 
-      if (!response.ok) {
-        const err = await response.json();
-        console.error(err);
-        document.getElementById("status").innerText = "Error al guardar: " + (err.message || response.status);
-        alert("Error al guardar en GitHub. Revisa la consola y el token/permiso.");
-        return;
-      }
+        /* CONFIGURA TU USUARIO Y REPO */
+        const owner = "EliazibNicasio";
+        const repo  = "jess-form-data";
 
-      document.getElementById("status").innerText = "Guardado correctamente en GitHub.";
-      alert("Datos guardados correctamente en el repositorio (carpeta data/).");
+        const now = new Date();
+        const timestamp = now.toISOString().replace(/[:.]/g, "-");
 
-    } catch (e) {
-      console.error(e);
-      document.getElementById("status").innerText = "Error de conexión al guardar.";
-      alert("Error de conexión: " + e.message);
-    }
-  }
+        const filename = `data/${timestamp}.txt`;
+        const content =
+`Address: ${address}
+Favorite Color: ${color}
+Saved at: ${now.toLocaleString()}
+`;
 
-  // Evento del botón Save
-  document.getElementById("saveBtn").addEventListener("click", () => {
-    const address = document.getElementById("address").value.trim();
-    const color = document.getElementById("color").value.trim();
+        const encoded = btoa(unescape(encodeURIComponent(content)));
 
-    if (!address && !color) {
-      alert("Por favor completa al menos un campo antes de guardar.");
-      return;
-    }
+        const url = `https://api.github.com/repos/${owner}/${repo}/contents/${filename}`;
 
-    saveToGitHub(address, color);
-  });
+        status.innerText = "Guardando en GitHub...";
 
-  // Nota: reemplaza TU_USUARIO_GITHUB y jess-form-data en el código arriba
-</script>
-</body>
-</html>
+        try {
+            const response = await fetch(url, {
+                method: "PUT",
