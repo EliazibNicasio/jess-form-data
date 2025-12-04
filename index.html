@@ -45,7 +45,6 @@ window.onload = () => {
     const hiJess = document.getElementById("hiJess");
     const formSection = document.getElementById("formSection");
 
-    // Desvanecer "Hi Jess"
     setTimeout(() => {
         hiJess.classList.add("fade-out");
 
@@ -77,14 +76,11 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
 
     try {
 
-        // Enviar datos a Google Sheets (CORS habilitado)
         const response = await fetch(
             "https://script.google.com/macros/s/AKfycbwczSPcIDp9JsjdguUzeqjp-8-TsUEfz23eCRT-XubG5KqdALau5JwTWJ1lnWiQidi7/exec",
             {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     address: address,
                     color: color
@@ -92,15 +88,20 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
             }
         );
 
-        statusMsg.textContent = "Saved successfully!";
-        statusMsg.style.color = "lightgreen";
+        const result = await response.json();
 
-        // Limpiar campos
-        document.getElementById("addressInput").value = "";
-        document.getElementById("colorInput").value = "";
+        if (result.status === "success") {
+            statusMsg.textContent = "Saved successfully!";
+            statusMsg.style.color = "lightgreen";
+            document.getElementById("addressInput").value = "";
+            document.getElementById("colorInput").value = "";
+        } else {
+            statusMsg.textContent = "Error saving.";
+            statusMsg.style.color = "red";
+        }
 
     } catch (err) {
-        statusMsg.textContent = "Error saving.";
+        statusMsg.textContent = "Network error.";
         statusMsg.style.color = "red";
         console.error(err);
     }
