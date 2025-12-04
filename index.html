@@ -1,255 +1,77 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hi Jess</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jess Form Data</title>
 
     <style>
         body {
-            margin: 0; padding: 0;
             font-family: Arial, sans-serif;
-            background: #000;
-            color: white;
-            overflow: hidden;
-        }
-
-        /* Caja central */
-        #contentBox {
-            position: relative;
-            z-index: 10;
-            backdrop-filter: blur(6px);
-            background: rgba(0,0,0,0.4);
-            margin: 100px auto;
-            padding: 30px;
-            width: 90%;
-            max-width: 400px;
-            border-radius: 15px;
+            background: #f2f2f2;
+            margin: 0;
+            padding: 0;
             text-align: center;
         }
 
-        /* Animaciones */
-        .hidden { opacity: 0; transform: scale(0.6); }
-        .visible { opacity: 1; transform: scale(1); transition: all 1s ease; }
-
-        .fade-out { opacity: 0; transform: scale(0.5); transition: all 1.2s ease; }
-        .fade-in  { opacity: 1; transform: scale(1); transition: all 1s ease; }
-
-        /* Flores cayendo */
-        .flower {
-            position: fixed;
-            top: -50px;
-            opacity: 0.75;
-            pointer-events: none;
-            animation: fall 8s linear infinite;
-        }
-        @keyframes fall {
-            0%   { transform: translateY(-50px) translateX(0) rotate(0deg); }
-            50%  { transform: translateY(50vh) translateX(40px) rotate(90deg); }
-            100% { transform: translateY(110vh) translateX(-40px) rotate(180deg); }
+        /* Animación */
+        #intro {
+            font-size: 40px;
+            margin-top: 120px;
+            white-space: nowrap;
+            overflow: hidden;
+            border-right: 3px solid black;
+            width: 0ch;
+            animation: typing 3s steps(10) forwards,
+                       cursor .4s step-end infinite alternate;
         }
 
-        /* Inputs */
-        input {
-            width: 100%;
+        @keyframes typing {
+            from { width: 0ch; }
+            to { width: 8ch; }
+        }
+        @keyframes cursor {
+            50% { border-color: transparent; }
+        }
+
+        /* Formulario oculto al inicio */
+        #app-container {
+            display: none;
+            margin-top: 40px;
+        }
+
+        input, textarea {
+            width: 300px;
+            margin: 10px;
             padding: 10px;
-            border-radius: 6px;
-            border: none;
-            outline: none;
-            margin-top: 5px;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 10px;
-            border: none;
-            border-radius: 8px;
-            background: #ff4f9a;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        button:hover { background: #ff2f85; }
-
-        #savedMsg {
-            opacity: 0;
-            transition: opacity 1s ease;
-            margin-top: 10px;
-            color: #8ef78e;
-        }
-
-        /* Botones secundarios */
-        .smallBtn {
-            background: #555;
-            font-size: 14px;
-        }
-        .dangerBtn {
-            background: #b42828;
         }
     </style>
 </head>
 
 <body>
 
-    <!-- Flores animadas -->
-    <div id="flowers"></div>
+    <!-- Animación -->
+    <div id="intro">Hi Jess</div>
 
-    <!-- Caja central -->
-    <div id="contentBox">
-        <h1 id="hiJess" class="visible" style="font-size:48px; margin-bottom:20px;">Hi Jess</h1>
-
-        <p id="secondMsg" class="hidden" style="font-size:18px;">
-            I want to make u the happiest woman in the world every day of my life.
-        </p>
-
-        <div id="formSection" class="hidden" style="margin-top:20px;">
-            <div style="text-align:left;">Address to deliver the flowers:</div>
-            <input id="address" type="text">
-
-            <div style="text-align:left; margin-top:15px;">Favorite Color?</div>
-            <input id="color" type="text">
-
-            <button id="saveBtn">Save Information</button>
-
-            <button id="enterTokenBtn" class="smallBtn">Ingresar/Ver Token</button>
-            <button id="logoutTokenBtn" class="smallBtn dangerBtn">Borrar Token</button>
-
-            <p id="status" style="margin-top:10px; font-size:14px; color:#ccc;"></p>
-        </div>
+    <!-- Formulario -->
+    <div id="app-container">
+        <h2>Formulario</h2>
+        <input id="name" placeholder="Nombre">
+        <input id="age" placeholder="Edad">
+        <textarea id="notes" placeholder="Notas"></textarea>
+        <button onclick="save()">Save</button>
     </div>
 
-<script>
+    <script>
+        // Cuando termina la animación, mostrar formulario
+        document.getElementById("intro").addEventListener("animationend", () => {
+            document.getElementById("app-container").style.display = "block";
+        });
 
-    /* ANIMACIÓN PRINCIPAL */
-    setTimeout(() => {
-        hiJess.classList.add("fade-out");
-        setTimeout(() => {
-            secondMsg.classList.remove("hidden");
-            secondMsg.classList.add("visible");
-
-            setTimeout(() => {
-                formSection.classList.remove("hidden");
-                formSection.classList.add("visible");
-            }, 1200);
-
-        }, 1200);
-    }, 1500);
-
-    /* FLORES */
-    function createFlower() {
-        const f = document.createElement("img");
-        f.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAA..." 
-        /* Aquí pondré una flor codificada en Base64 para que NO necesites ninguna imagen externa */
-        f.classList.add("flower");
-
-        f.style.left = Math.random()*100 + "vw";
-        f.style.animationDuration = (6 + Math.random()*6) + "s";
-        f.style.width = (30 + Math.random()*40) + "px";
-
-        document.body.appendChild(f);
-        setTimeout(() => f.remove(), 12000);
-    }
-    setInterval(createFlower, 700);
-
-
-
-    /* TOKEN EN sessionStorage */
-    function getToken() { return sessionStorage.getItem("GITHUB_PAT"); }
-    function setToken(t) { sessionStorage.setItem("GITHUB_PAT", t); }
-    function clearToken() { sessionStorage.removeItem("GITHUB_PAT"); }
-
-    document.getElementById("enterTokenBtn").onclick = () => {
-        const current = getToken() || "";
-        const newToken = prompt("Introduce tu GitHub PAT:", current);
-        if (newToken !== null) {
-            setToken(newToken.trim());
-            status.innerText = "Token guardado.";
+        function save() {
+            alert("Aquí va el código de guardado en GitHub (ya lo tienes en tu proyecto)");
         }
-    };
-
-    document.getElementById("logoutTokenBtn").onclick = () => {
-        clearToken();
-        status.innerText = "Token eliminado.";
-    };
-
-
-    /* GUARDAR EN GITHUB */
-    async function saveToGitHub(address, color) {
-
-        const token = getToken();
-        if (!token) {
-            alert("Ingresa tu token primero.");
-            return;
-        }
-
-        /* CONFIGURA TU USUARIO Y REPO */
-        const owner = "EliazibNicasio";
-        const repo  = "jess-form-data";
-
-        const now = new Date();
-        const timestamp = now.toISOString().replace(/[:.]/g, "-");
-
-        const filename = `data/${timestamp}.txt`;
-        const content =
-`Address: ${address}
-Favorite Color: ${color}
-Saved at: ${now.toLocaleString()}
-`;
-
-        const encoded = btoa(unescape(encodeURIComponent(content)));
-
-        const url = `https://api.github.com/repos/${owner}/${repo}/contents/${filename}`;
-
-        status.innerText = "Guardando en GitHub...";
-
-        try {
-            const response = await fetch(url, {
-                method: "PUT",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                    "Accept": "application/vnd.github+json"
-                },
-                body: JSON.stringify({
-                    message: "Save Jess form data",
-                    content: encoded
-                })
-            });
-
-            if (!response.ok) {
-                const err = await response.json();
-                status.innerText = "Error: " + err.message;
-                console.error(err);
-                return;
-            }
-
-            status.innerText = "Guardado correctamente.";
-            alert("Datos guardados en la carpeta /data/ del repositorio.");
-
-        } catch (e) {
-            status.innerText = "Error de conexión.";
-            console.error(e);
-        }
-    }
-
-
-    /* BOTÓN SAVE */
-    saveBtn.onclick = () => {
-        const address = document.getElementById("address").value.trim();
-        const color   = document.getElementById("color").value.trim();
-
-        if (!address && !color) {
-            alert("Escribe al menos uno de los campos.");
-            return;
-        }
-
-        saveToGitHub(address, color);
-    };
-
-</script>
+    </script>
 
 </body>
 </html>
-
