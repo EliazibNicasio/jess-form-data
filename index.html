@@ -45,7 +45,6 @@ window.onload = () => {
     const hiJess = document.getElementById("hiJess");
     const formSection = document.getElementById("formSection");
 
-    // Desvanecer "Hi Jess"
     setTimeout(() => {
         hiJess.classList.add("fade-out");
 
@@ -59,7 +58,7 @@ window.onload = () => {
 };
 
 
-// Al guardar la información
+// Evento del botón
 document.getElementById("saveBtn").addEventListener("click", async () => {
 
     const address = document.getElementById("addressInput").value.trim();
@@ -77,25 +76,33 @@ document.getElementById("saveBtn").addEventListener("click", async () => {
 
     try {
 
-        // Enviar datos a Google Sheets
-        await fetch("https://script.google.com/macros/s/AKfycbwczSPcIDp9JsjdguUzeqjp-8-TsUEfz23eCRT-XubG5KqdALau5JwTWJ1lnWiQidi7/exec", {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                address: address,
-                color: color
-            })
-        });
+        const response = await fetch(
+            "https://script.google.com/macros/s/AKfycbwczSPcIDp9JsjdguUzeqjp-8-TsUEfz23eCRT-XubG5KqdALau5JwTWJ1lnWiQidi7/exec",
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    address: address,
+                    color: color
+                })
+            }
+        );
 
-        statusMsg.textContent = "Saved successfully!";
-        statusMsg.style.color = "lightgreen";
+        // Leer respuesta real
+        const text = await response.text();
 
-        document.getElementById("addressInput").value = "";
-        document.getElementById("colorInput").value = "";
+        if (text.includes("OK")) {
+            statusMsg.textContent = "Saved successfully!";
+            statusMsg.style.color = "lightgreen";
+            document.getElementById("addressInput").value = "";
+            document.getElementById("colorInput").value = "";
+        } else {
+            statusMsg.textContent = "Error saving (Script responded but not OK).";
+            statusMsg.style.color = "red";
+        }
 
     } catch (err) {
-        statusMsg.textContent = "Error saving.";
+        statusMsg.textContent = "Error saving (network or script error).";
         statusMsg.style.color = "red";
         console.error(err);
     }
