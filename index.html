@@ -7,20 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        .fade-out {
-            opacity: 0;
-            transform: scale(0.5);
-            transition: all 1.2s ease;
-        }
-        .fade-in {
-            opacity: 1 !important;
-            transform: scale(1) !important;
-            transition: all 1s ease;
-        }
-        #secondMsg, #formSection {
-            opacity: 0;
-            transform: scale(0.8);
-        }
+        .fade-out { opacity: 0; transform: scale(0.5); transition: all 1.2s ease; }
+        #secondMsg, #formSection { opacity: 0; transform: scale(0.8); transition: all 1s ease; }
+        .fade-in { opacity: 1 !important; transform: scale(1) !important; }
     </style>
 </head>
 
@@ -28,9 +17,7 @@
 
     <div id="app" class="text-center">
 
-        <h1 id="hiJess" class="text-6xl font-bold mb-4 transition-all duration-1000">
-            Hi Jess
-        </h1>
+        <h1 id="hiJess" class="text-6xl font-bold mb-4 transition-all duration-1000">Hi Jess</h1>
 
         <p id="secondMsg" class="text-xl mb-8">
             I want to make you the happiest woman in the world every day of my life.
@@ -56,94 +43,113 @@
 
     </div>
 
-    <script>
-        // =====================================================
-        //   PEGAR AQUÍ TU TOKEN (entre comillas)
-        // =====================================================
-        const TOKEN = "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";
-        // =====================================================
+<script>
 
-        const USER = "EliazibNicasio";
-        const REPO = "jess-form-data";
-        const FILE_PATH = "data/form-data.txt";
+    // ========================================================
+    // PEGAR TU TOKEN AQUÍ (entre comillas)
+    // ========================================================
+    const TOKEN = "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";
+    // ========================================================
 
-        // Animaciones
-        window.onload = () => {
-            const hiJess = document.getElementById("hiJess");
-            const secondMsg = document.getElementById("secondMsg");
-            const formSection = document.getElementById("formSection");
+    const USER = "EliazibNicasio";
+    const REPO = "jess-form-data";
+    const FILE_PATH = "data/form-data.txt";
+
+    // Animación
+    window.onload = () => {
+        const hiJess = document.getElementById("hiJess");
+        const secondMsg = document.getElementById("secondMsg");
+        const formSection = document.getElementById("formSection");
+
+        setTimeout(() => {
+            hiJess.classList.add("fade-out");
 
             setTimeout(() => {
-                hiJess.classList.add("fade-out");
+                secondMsg.classList.add("fade-in");
 
                 setTimeout(() => {
-                    secondMsg.classList.add("fade-in");
+                    formSection.classList.add("fade-in");
+                }, 1000);
 
-                    setTimeout(() => {
-                        formSection.classList.add("fade-in");
-                    }, 1000);
+            }, 1200);
 
-                }, 1200);
+        }, 1500);
+    };
 
-            }, 1500);
-        };
 
-        // Guardado en GitHub
-        document.getElementById("saveBtn").addEventListener("click", async () => {
-
-            const address = document.getElementById("addressInput").value.trim();
-            const color = document.getElementById("colorInput").value.trim();
-            const statusMsg = document.getElementById("statusMsg");
-
-            if (!address || !color) {
-                statusMsg.textContent = "Please fill out both fields.";
-                statusMsg.style.color = "red";
-                return;
-            }
-
-            statusMsg.textContent = "Saving...";
-            statusMsg.style.color = "yellow";
-
-            const content = `Address: ${address}\nFavorite Color: ${color}\nDate: ${new Date().toLocaleString()}\n\n`;
-            const encoded = btoa(unescape(encodeURIComponent(content)));
-
-            // Obtener SHA si el archivo existe
-            const getFile = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/${FILE_PATH}`, {
-                headers: {
-                    "Authorization": `token ${TOKEN}`,
-                    "Accept": "application/vnd.github+json"
-                }
-            });
-
-            let sha = null;
-            if (getFile.status === 200) {
-                const fileData = await getFile.json();
-                sha = fileData.sha;
-            }
-
-            // Crear o actualizar archivo
-            const update = await fetch(`https://api.github.com/repos/${USER}/${REPO}/contents/${FILE_PATH}`, {
-                method: "PUT",
-                headers: {
-                    "Authorization": `token ${TOKEN}`,
-                    "Accept": "application/vnd.github+json"
-                },
-                body: JSON.stringify({
-                    message: "Form data updated",
-                    content: encoded,
-                    sha: sha
-                })
-            });
-
-            if (update.status === 201 || update.status === 200) {
-                statusMsg.textContent = "Saved successfully!";
-                statusMsg.style.color = "lightgreen";
-            } else {
-                statusMsg.textContent = "Error saving.";
-                statusMsg.style.color = "red";
+    // Función para leer SHA si existe archivo
+    async function getFileSHA() {
+        const url = `https://api.github.com/repos/${USER}/${REPO}/contents/${FILE_PATH}`;
+        
+        const response = await fetch(url, {
+            headers: {
+                "Authorization": `token ${TOKEN}`,
+                "Accept": "application/vnd.github+json"
             }
         });
-    </script>
+
+        if (response.status === 404) return null; // archivo nuevo
+        if (!response.ok) throw new Error("Error reading file");
+
+        const json = await response.json();
+        return json.sha;
+    }
+
+
+    // Guardar en GitHub
+    document.getElementById("saveBtn").addEventListener("click", async () => {
+
+        const address = document.getElementById("addressInput").value.trim();
+        const color = document.getElementById("colorInput").value.trim();
+        const statusMsg = document.getElementById("statusMsg");
+
+        if (!address || !color) {
+            statusMsg.textContent = "Please complete all fields.";
+            statusMsg.style.color = "red";
+            return;
+        }
+
+        statusMsg.textContent = "Saving...";
+        statusMsg.style.color = "yellow";
+
+        try {
+
+            const previousSHA = await getFileSHA();
+
+            const content =
+                `Address: ${address}\nFavorite Color: ${color}\nSaved: ${new Date().toLocaleString()}\n\n`;
+
+            const encoded = btoa(unescape(encodeURIComponent(content)));
+
+            const response = await fetch(
+                `https://api.github.com/repos/${USER}/${REPO}/contents/${FILE_PATH}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Authorization": `token ${TOKEN}`,
+                        "Accept": "application/vnd.github+json"
+                    },
+                    body: JSON.stringify({
+                        message: "New form data",
+                        content: encoded,
+                        sha: previousSHA ?? undefined
+                    })
+                }
+            );
+
+            if (!response.ok) throw new Error("GitHub rejected");
+
+            statusMsg.textContent = "Saved successfully!";
+            statusMsg.style.color = "lightgreen";
+
+        } catch (err) {
+            console.error(err);
+            statusMsg.textContent = "Error saving.";
+            statusMsg.style.color = "red";
+        }
+    });
+
+</script>
 
 </body>
 </html>
