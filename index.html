@@ -13,44 +13,40 @@
     </style>
 </head>
 
-<body class="bg-black text-white flex items-center justify-center min-h-screen">
+<body class="bg-black text-white min-h-screen flex items-center justify-center">
 
-    <div id="app" class="text-center">
+<div class="text-center">
 
-        <h1 id="hiJess" class="text-6xl font-bold mb-4 transition-all duration-1000">Hi Jess</h1>
+    <h1 id="hiJess" class="text-6xl font-bold mb-4 transition-all">Hi Jess</h1>
 
-        <p id="secondMsg" class="text-xl mb-8">
-            I want to make you the happiest woman in the world every day of my life.
-        </p>
+    <p id="secondMsg" class="text-xl mb-6">
+        I want to make you the happiest woman in the world every day of my life.
+    </p>
 
-        <div id="formSection" class="mt-6 max-w-md mx-auto">
-            <div class="mb-4">
-                <label class="block mb-1 text-left">Address to deliver the flowers:</label>
-                <input id="addressInput" type="text" class="w-full p-2 text-black rounded">
-            </div>
+    <div id="formSection" class="max-w-md mx-auto">
 
-            <div class="mb-4">
-                <label class="block mb-1 text-left">Favorite Color?</label>
-                <input id="colorInput" type="text" class="w-full p-2 text-black rounded">
-            </div>
+        <label class="block mb-1 text-left">Address to deliver the flowers:</label>
+        <input id="addressInput" class="w-full p-2 text-black rounded mb-4" type="text">
 
-            <button id="saveBtn" class="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded">
-                Save
-            </button>
+        <label class="block mb-1 text-left">Favorite Color?</label>
+        <input id="colorInput" class="w-full p-2 text-black rounded mb-4" type="text">
 
-            <p id="statusMsg" class="mt-4 text-green-400"></p>
-        </div>
+        <button id="saveBtn"
+                class="bg-pink-600 hover:bg-pink-700 px-4 py-2 rounded text-white font-bold w-full">
+            Save Information
+        </button>
 
+        <p id="statusMsg" class="text-sm mt-4"></p>
     </div>
+
+</div>
 
 <script>
 
-    // ========================================================
-    // PEGAR TU TOKEN AQUÍ (entre comillas)
-    // ========================================================
-    const TOKEN = "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";
-    // ========================================================
+    // ⚠️ Pegas tu token aquí pero SOLO para pruebas locales
+    const TOKEN = "AQUI_TU_TOKEN";
 
+    // Configuración
     const USER = "EliazibNicasio";
     const REPO = "jess-form-data";
     const FILE_PATH = "data/form-data.txt";
@@ -63,40 +59,30 @@
 
         setTimeout(() => {
             hiJess.classList.add("fade-out");
-
             setTimeout(() => {
                 secondMsg.classList.add("fade-in");
-
-                setTimeout(() => {
-                    formSection.classList.add("fade-in");
-                }, 1000);
-
+                setTimeout(() => formSection.classList.add("fade-in"), 800);
             }, 1200);
-
         }, 1500);
     };
 
+    // Obtener SHA si el archivo ya existe
+    async function getSHA() {
+        const url = `https://api.github.com/repos/EliazibNicasio/jess-form-data/contents/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`;
 
-    // Función para leer SHA si existe archivo
-    async function getFileSHA() {
-        const url = `https://api.github.com/repos/${USER}/${REPO}/contents/${FILE_PATH}`;
-        
-        const response = await fetch(url, {
+        const res = await fetch(url, {
             headers: {
                 "Authorization": `token ${TOKEN}`,
                 "Accept": "application/vnd.github+json"
             }
         });
 
-        if (response.status === 404) return null; // archivo nuevo
-        if (!response.ok) throw new Error("Error reading file");
-
-        const json = await response.json();
+        if (res.status === 404) return null;
+        const json = await res.json();
         return json.sha;
     }
 
-
-    // Guardar en GitHub
+    // Guardar datos
     document.getElementById("saveBtn").addEventListener("click", async () => {
 
         const address = document.getElementById("addressInput").value.trim();
@@ -104,7 +90,7 @@
         const statusMsg = document.getElementById("statusMsg");
 
         if (!address || !color) {
-            statusMsg.textContent = "Please complete all fields.";
+            statusMsg.textContent = "Please fill all fields.";
             statusMsg.style.color = "red";
             return;
         }
@@ -113,10 +99,9 @@
         statusMsg.style.color = "yellow";
 
         try {
+            const sha = await getSHA();
 
-            const previousSHA = await getFileSHA();
-
-            const content =
+            const content = 
                 `Address: ${address}\nFavorite Color: ${color}\nSaved: ${new Date().toLocaleString()}\n\n`;
 
             const encoded = btoa(unescape(encodeURIComponent(content)));
@@ -130,23 +115,24 @@
                         "Accept": "application/vnd.github+json"
                     },
                     body: JSON.stringify({
-                        message: "New form data",
+                        message: "Form update",
                         content: encoded,
-                        sha: previousSHA ?? undefined
+                        sha: sha ?? undefined
                     })
                 }
             );
 
-            if (!response.ok) throw new Error("GitHub rejected");
+            if (!response.ok) throw new Error("GitHub rejected the request");
 
             statusMsg.textContent = "Saved successfully!";
             statusMsg.style.color = "lightgreen";
 
         } catch (err) {
-            console.error(err);
             statusMsg.textContent = "Error saving.";
             statusMsg.style.color = "red";
+            console.error(err);
         }
+
     });
 
 </script>
